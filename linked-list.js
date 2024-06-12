@@ -12,10 +12,7 @@ class LinkedList {
     this.head = null;
   }
 
-  size() {
-    return this.listSize;
-  }
-
+  // adds a new key value pair to LinkedList/bucket
   add(key, value) {
     // creates a new Node instance with the given key and value
     const newNode = new Node(key, value);
@@ -24,6 +21,7 @@ class LinkedList {
     if (!this.head) {
       // if it is, sets the head of the list to be the newNode
       this.head = newNode;
+      this.listSize++;
     } else {
       // initializes current to point to the head of LinkedList instance, current will be used to traverse the LinkedList instance
       let current = this.head;
@@ -50,6 +48,8 @@ class LinkedList {
       } else {
         // if it isn't, adds the new node to the end of the LinkedList instance
         current.next = newNode;
+
+        // increments the listSize of the LinkedList/bucket
         this.listSize++;
       }
     }
@@ -85,14 +85,18 @@ class LinkedList {
     if (this.head.key === key) {
       // updates the head to point to the next node
       this.head = this.head.next;
+
+      // decrements the listSize of the LinkedList/bucket
+      this.listSize--;
       return;
     }
 
+    // assigns the head node to current
     let current = this.head;
 
     /* traverse the list to find the node before the one to be removed
-      starts a while loop that continues as long as the current node has a next node and as long as 
-      the key of the next node doesn't match the key to be removed */
+          starts a while loop that continues as long as the current node has a next node and as long as 
+          the key of the next node doesn't match the key to be removed */
     while (current.next && current.next.key !== key) {
       // move to the next node in LinkedList instance
       current = current.next;
@@ -101,93 +105,94 @@ class LinkedList {
     // after exiting the loop, checks if the next node exists, this means the key was found in the LinkedList instance
     if (current.next) {
       /* if the next node exists and matches the key to be removed, this line updates the next pointer of the current 
-        node to skip the node to be removed, removing the node with the given key from the LinkedList */
+            node to skip the node to be removed, removing the node with the given key from the LinkedList */
       current.next = current.next.next;
+
+      // decrements the listSize of the LinkedList/bucket
       this.listSize--;
     }
   }
-}
 
-class HashMapWLLBuckets {
-  constructor(size) {
-    // size is the number of buckets in the hashmap
-    this.size = size;
-
-    // creates a new array with a length of size
-    this.buckets = Array(size)
-      // fills all elements in the array with null
-      .fill(null)
-
-      // initializes each bucket, replacing null with LinkedList
-      .map(() => new LinkedList());
+  // returns total number of nodes in LinkedList/bucket
+  getListSize() {
+    return this.listSize;
   }
 
-  // Hash Function // project step #1
-  hash(key) {
-    let hashCode = 0;
+  // returns all the keys in LinkedList/bucket
+  getKeys() {
+    // assigns the bucket's head node to current
+    let current = this.head;
 
-    const primeNumber = 31;
-    for (let i = 0; i < key.length; i++) {
-      hashCode = primeNumber * hashCode + key.charCodeAt(i);
+    // initializes an empty array
+    let keys = [];
+
+    // while current exists
+    while (current) {
+      // if the current node has a key
+      if (current.key) {
+        // push the key to the keys array
+        keys.push(current.key);
+      }
+
+      // assigns the next node to current, traverses the LinkedList/bucket
+      current = current.next;
     }
 
-    // returns the computed hash code
-    return hashCode;
+    // returns the keys array now filled up
+    return keys;
   }
 
-  // Bucket Index Calculation
-  getBucketIndex(key) {
-    return Math.abs(this.hash(key)) % this.size;
-  }
+  // returns all the values in LinkedList/bucket
+  getValues() {
+    // assigns the bucket's head node to current
+    let current = this.head;
 
-  // Adds a key-value pair to the hashmap // project step #2
-  set(key, value) {
-    const index = this.getBucketIndex(key);
-    this.buckets[index].add(key, value);
-  }
+    // initializes an empty array
+    let values = [];
 
-  // retrieves the value for a given key  // project step #3
-  get(key) {
-    const index = this.getBucketIndex(key);
-    return this.buckets[index].get(key);
-  }
+    // while current exists
+    while (current) {
+      // if the current node has a key
+      if (current.value) {
+        // push the key to the keys array
+        values.push(current.value);
+      }
 
-  has(key) {
-    const index = this.getBucketIndex(key);
-    let returnValue = this.buckets[index].get(key);
-    if (returnValue != null) {
-      return true;
-    } else {
-      return false;
+      // assigns the next node to current, traverses the LinkedList/bucket
+      current = current.next;
     }
+
+    // returns the keys array now filled up
+    return values;
   }
 
-  // removes a key-value pair  // project step #5
-  remove(key) {
-    const index = this.getBucketIndex(key);
-    this.buckets[index].remove(key);
-  }
+  // returns an array of all key-value pairs, each as an array (so an array of arrays)
+  getEntries() {
+    // assign the head node to current
+    let current = this.head;
 
-  length() {
-    let numberOfNodes = 0;
-    this.buckets.forEach((bucket) => {
-      numberOfNodes += bucket.size();
-    });
-    return numberOfNodes;
+    // initializes an empty array
+    let entries = [];
+
+    // while current exists
+    while (current) {
+      // if the current node has a key and value
+      if (current.key && current.value) {
+        // assign the current node's key and value to array called entry
+        let entry = [current.key, current.value];
+
+        // push the entry to the entries array
+        entries.push(entry);
+      }
+
+      // assigns the next node to current, traverses the LinkedList/bucket
+      current = current.next;
+    }
+
+    // removes the second nested arrays
+    entries = entries.flat();
+    return entries;
   }
 }
 
-const map2 = new HashMapWLLBuckets(10);
-map2.set("name", "Alice");
-map2.set("age", "12");
-map2.set("hair color", "brown");
-map2.set("eye color", "brown");
-console.log(map2.get("name")); // Alice
-map2.remove("name");
-console.log(map2.get("name")); // null
-console.log(map2.has("age"));
-map2.remove("eye color");
-console.log(map2);
-
-/* key is what my hash function will take as an input 
-I access a bucket with the hash code */
+export { LinkedList };
